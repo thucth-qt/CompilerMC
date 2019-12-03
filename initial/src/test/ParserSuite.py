@@ -469,7 +469,7 @@ class ParserSuite(unittest.TestCase):
 			}
 			
 			"""
-			expect = "successful"
+			expect = "Error on line 3 col 17: =="
 			self.assertTrue(TestParser.checkParser(input,expect,152))
 		def test_153(self):
 			input = r"""   

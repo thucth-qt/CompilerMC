@@ -1,0 +1,1 @@
+Program([FuncDecl(Id(main),[],IntType,Block([CallExpr(Id(print),[StringLiteral(Hello Word\n)])]))])

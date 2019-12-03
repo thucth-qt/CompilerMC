@@ -1,0 +1,1 @@
+Program([FuncDecl(Id(foo),[],VoidType,Block([BinaryOp(+,UnaryOp(-,FloatLiteral(1.23)),BinaryOp(*,UnaryOp(!,ArrayCell(Id(array),IntLiteral(2))),CallExpr(Id(sum),[IntLiteral(3)])))]))])

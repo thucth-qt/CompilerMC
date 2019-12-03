@@ -1,0 +1,1 @@
+Program([FuncDecl(Id(main),[],IntType,Block([BinaryOp(=,Id(fp),CallExpr(Id(fopen),[StringLiteral(file.txt),StringLiteral(r)])),CallExpr(Id(fclose),[Id(fp)]),Return(IntLiteral(0))]))])

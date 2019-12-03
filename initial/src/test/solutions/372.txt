@@ -1,0 +1,1 @@
+Program([FuncDecl(Id(main),[],VoidType,Block([If(CallExpr(Id(sum),[IntLiteral(5)]),BinaryOp(=,Id(a),Id(b)),BinaryOp(=,Id(c),Id(d)))]))])

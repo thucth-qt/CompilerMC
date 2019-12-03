@@ -1,7 +1,6 @@
-/*
-Họ và tên: Trần Hữu Thức
-MSSV: 1713454
-*/
+
+// MSSV: 1713454
+
 
 grammar MC;
 
@@ -31,17 +30,19 @@ options{
 
 //PROGRAM STRUCT
 
-program  	: many_decs EOF ;
 
-many_decs	: dec many_decs|dec;
+program: dec+ EOF;
 
 dec 		: var_dec|func_dec;
 
 //Variable declaration:
 
-var_dec	: primtype list_var SM;
+//var_dec	: primtype list_var SM;
 
-list_var: ID (LQ INTLIT RQ)? CM list_var|ID (LQ INTLIT RQ)?;
+//list_var: var (CM var)*;
+var_dec :primtype var (CM var)* SM;
+
+var: ID LQ INTLIT RQ|ID;
 
 primtype: INT|FLOAT|BOOLEAN|STRING;
 
@@ -53,13 +54,16 @@ types: primtype|pointertype|VOID;
 
 pointertype: primtype LQ RQ;
 
-list_para: para_dec CM list_para|para_dec;
+//list_para: para_dec CM list_para|para_dec;
+list_para: para_dec (CM para_dec)*;
 
 para_dec: primtype ID (LQ RQ)?;
 
 // Statement:
 
-block_stmt: LP (var_dec|stmt)* RP; 
+block_stmt: LP block_member* RP; 
+
+block_member: var_dec|stmt;
 
 stmt: if_stmt|for_stmt|while_stmt|break_stmt|continue_stmt|return_stmt|exp_stmt|block_stmt;
 
@@ -78,26 +82,50 @@ return_stmt: RETURN exp? SM;
 exp_stmt: exp SM;
 
 
-exp : operand
+/*exp : operand
     | exp LQ exp RQ                         //element of array
-	| operand LQ exp RQ								// associative: none 
+	| operand LQ exp RQ								// associative: none
 	| <assoc=right> (SUB|NOT)  exp
 	| exp (DIV|MUL|MODULE) exp
 	| exp (ADD|SUB) exp
-	| operand (LSS|LSSEQ|GRR|GRREQ) operand 		// associative: none 
-	| operand (EQ|NEQ) operand 						// associative: none 
+	| operand (LSS|LSSEQ|GRR|GRREQ) operand 		// associative: none
+	| operand (EQ|NEQ) operand 						// associative: none
 	| exp AND exp
 	| exp OR exp
 	| <assoc=right> exp ASN exp
 	;
-terminated_tok: (INTLIT|FLOATLIT|STRINGLIT|BOOLIT|ID);
+terminated_tok: INTLIT|FLOATLIT|STRINGLIT|BOOLIT|ID;
 
 func_call: ID LB (exp (CM exp)*)? RB;
 
 element_of_array: (terminated_tok|LB exp RB|func_call) LQ exp RQ;
 
-operand: terminated_tok| element_of_array|func_call| LB exp RB; //phai them subexp o day
+operand: terminated_tok| element_of_array|func_call| LB exp RB; //phai them subexp o day*/
 
+/*exp : operand
+    | LB exp RB
+    | exp LQ exp RQ                         //element of array							// associative: none
+	| <assoc=right> (SUB|NOT)  exp
+	| exp (DIV|MUL|MODULE) exp
+	| exp (ADD|SUB) exp
+	| exp (LSS|LSSEQ|GRR|GRREQ) exp 		// associative: none
+	| exp (EQ|NEQ) exp 						// associative: none
+	| exp AND exp
+	| exp OR exp
+	| <assoc=right> exp ASN exp
+	;*/
+
+exp : exp1 ASN exp|exp1;
+exp1: exp1 OR exp2|exp2;
+exp2: exp2 AND exp3|exp3;
+exp3: exp4 (EQ|NEQ) exp4|exp4;
+exp4: exp5 (LSS|LSSEQ|GRR|GRREQ) exp5|exp5;
+exp5: exp5 (ADD|SUB) exp6|exp6;
+exp6: exp6 (DIV|MUL|MODULE) exp7|exp7;
+exp7: (SUB|NOT) exp7|exp8;
+exp8: exp9 LQ exp RQ|exp9;
+exp9: LB exp RB|operand;
+operand: INTLIT|FLOATLIT|STRINGLIT|BOOLIT|ID|ID LB (exp (CM exp)*)? RB;
 
 //Characters:
 
@@ -145,13 +173,6 @@ WHILE 	: 'while';
 
 	fragment FALSE	: 'false';
 
-// ID phai sau Keyword
-
-ID		: (Letter|'_') (Letter|Digit|'_')*;
-
-	fragment Letter	: [a-zA-Z];
-
-	fragment Digit 	: [0-9];
 
 // Operators:
 
@@ -223,6 +244,17 @@ STRINGLIT	: '"' (~[\b\r\n\f\t"\\] |ESCAPE)* '"'
 					self.text = temp[1:-1]
 				}
 				;
+// ID phai sau Keyword, sau Boolit
+
+ID		: (Letter|'_') (Letter|Digit|'_')*;
+
+	fragment Letter	: [a-zA-Z];
+
+	fragment Digit 	: [0-9];
+
+
+
+
 // chú ý: ~["]* không bao gồm \", vì thiếu " nên ko tạo được \" => add thêm escaped vô
 UNCLOSE_STRING	: '"' (~["]|ESCAPE)*? ([\r\n\f]|EOF)
 				{	

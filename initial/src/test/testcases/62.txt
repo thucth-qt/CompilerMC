@@ -6,4 +6,4 @@ int plusFuncInt(int x, int y) {
 double plusFuncDouble(double x, double y) {
   return x + y;
 }
-            
+			

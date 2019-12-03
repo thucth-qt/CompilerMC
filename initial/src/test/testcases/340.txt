@@ -1,0 +1,11 @@
+
+            int main(){
+                int i,j;
+                i = 1; j = 1;
+                do {
+                    x = i + j;
+                    print(x);
+                }
+                while(i<10 && j<10);
+            }
+        

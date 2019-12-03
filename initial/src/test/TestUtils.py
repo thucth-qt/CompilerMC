@@ -1,16 +1,17 @@
 import sys,os
 from antlr4 import *
 from antlr4.error.ErrorListener import ConsoleErrorListener,ErrorListener
-if not './main/mc/parser/' in sys.path:
-    sys.path.append('./main/mc/parser/')# them duong dan vao sys.path de import lexererr
-if os.path.isdir('../target/main/mc/parser') and not '../target/main/mc/parser/' in sys.path:
-    sys.path.append('../target/main/mc/parser/')#kiem tra xem co duong dan ... ma chua co trong sys.path thi them vao
+#if not './main/mc/parser/' in sys.path:
+#    sys.path.append('./main/mc/parser/')
+#if os.path.isdir('../target/main/mc/parser') and not '../target/main/mc/parser/' in sys.path:
+#    sys.path.append('../target/main/mc/parser/')
 from MCLexer import MCLexer
 from MCParser import MCParser
 from lexererr import *
+from ASTGeneration import ASTGeneration
 
-class TestUtil:
-    @staticmethod
+class TestUtil: 
+    @staticmethod #viet test case vao file txt
     def makeSource(inputStr,num):
         filename = "./test/testcases/" + str(num) + ".txt"
         file = open(filename,"w")
@@ -19,7 +20,7 @@ class TestUtil:
         return FileStream(filename)
 
 
-class TestLexer:
+class TestLexer: #so trung ket qua trong solution
     @staticmethod
     def checkLexeme(input,expect,num):
         inputfile = TestUtil.makeSource(input,num)
@@ -53,7 +54,7 @@ class SyntaxException(Exception):
     def __init__(self,msg):
         self.message = msg
 
-class TestParser:
+class TestParser: #so trung ket qua trong solutions
     @staticmethod
     def createErrorListener():
          return NewErrorListener.INSTANCE
@@ -83,5 +84,19 @@ class TestParser:
         line = dest.read()
         return line == expect
 
-
+class TestAST: #so trung ket qua voi trong solutions
+    @staticmethod
+    def checkASTGen(input,expect,num):
+        inputfile = TestUtil.makeSource(input,num)
+        dest = open("./test/solutions/" + str(num) + ".txt","w")
+        lexer = MCLexer(inputfile)
+        tokens = CommonTokenStream(lexer)
+        parser = MCParser(tokens)
+        tree = parser.program()
+        asttree = ASTGeneration().visit(tree)
+        dest.write(str(asttree))
+        dest.close()
+        dest = open("./test/solutions/" + str(num) + ".txt","r")
+        line = dest.read()
+        return line == expect
         

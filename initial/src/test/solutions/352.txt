@@ -1,0 +1,1 @@
+Program([FuncDecl(Id(main),[],IntType,Block([CallExpr(Id(sum),[CallExpr(Id(fact),[IntLiteral(10)])])]))])
