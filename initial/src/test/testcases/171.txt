@@ -1,0 +1,10 @@
+   
+			int PRINT(int a){
+            Date=9;
+            int i;
+            for(i=0;i<8;i=i+1)
+                Date=Date+1;
+            return 1;
+        	}
+			
+			

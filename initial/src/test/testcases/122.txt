@@ -1,0 +1,8 @@
+   
+			boolean b;
+			boolean foo(boolean k){
+			k=b;
+			return k==b;
+			}
+			
+			

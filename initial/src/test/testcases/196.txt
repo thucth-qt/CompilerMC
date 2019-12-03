@@ -1,0 +1,14 @@
+   
+			int main(){
+	            do{
+	                a=c;
+	                d=b;
+	            }
+	            {
+	                a=a+4;
+	                b>4;
+	            }
+	            while a!=b;
+        	}
+			
+			

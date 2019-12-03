@@ -1,0 +1,4 @@
+int main() {
+            str = "abc
+            ndef";
+        }

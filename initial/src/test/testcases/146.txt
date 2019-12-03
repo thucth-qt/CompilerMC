@@ -1,0 +1,4 @@
+   
+			void main(string k[]) { if(!((true))) foo(0); else return 5;}
+			
+			

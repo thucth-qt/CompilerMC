@@ -1,0 +1,7 @@
+   
+			
+			int _foo(int str[], float x){
+				return -1;
+			}
+			
+			

@@ -1,0 +1,6 @@
+   
+			float arr[10],number;
+            boolean list[2],check;
+            float test(int a, boolean list[], float brr[]){}
+			
+			

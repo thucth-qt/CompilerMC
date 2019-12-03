@@ -1,0 +1,5 @@
+   
+			float number;
+			float FUNC(float x){}
+			
+			

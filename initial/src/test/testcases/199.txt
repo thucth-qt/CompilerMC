@@ -1,0 +1,6 @@
+   
+			int main(){
+            	for (true;(a);1) ;
+        	}
+			
+			

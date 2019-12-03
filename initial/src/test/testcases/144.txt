@@ -1,0 +1,5 @@
+   
+			
+			void main() { if(5) a=5; else 3+2=f;}
+			
+			

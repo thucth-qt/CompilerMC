@@ -1,0 +1,10 @@
+
+            int main(){ 
+            string x;
+            x="abc
+
+
+
+";
+            }
+            

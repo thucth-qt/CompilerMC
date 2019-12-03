@@ -1,0 +1,9 @@
+   
+			
+			void foo(){
+			float x;
+			x=1.23;
+			int y;
+			y=1e-3;
+			}
+			

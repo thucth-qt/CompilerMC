@@ -1,0 +1,12 @@
+   
+			int main(){
+	            do{
+	                a=c;
+	                d=b;
+	            }
+	            {
+	            }
+	            while (a!=b);
+        	}
+			
+			

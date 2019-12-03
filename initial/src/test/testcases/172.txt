@@ -1,0 +1,10 @@
+   
+			void PRINT(int a){
+            Date=9;
+            int i;
+            i=10;
+            if(i>8)
+                Date=Date+3;
+        	}
+			
+			

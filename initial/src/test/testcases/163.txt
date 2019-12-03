@@ -1,0 +1,6 @@
+   
+			int Void(){
+			int void;
+			}
+			
+			

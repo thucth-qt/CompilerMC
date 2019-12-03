@@ -1,0 +1,7 @@
+   
+			string chuoi(int x){
+			//statement
+			x=chuoi[-1];
+			}
+			
+			

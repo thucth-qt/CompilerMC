@@ -1,0 +1,6 @@
+   
+			float number;
+            boolean check;
+            float FLOAT_FUNC(int a){}
+			
+			

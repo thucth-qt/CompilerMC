@@ -1,0 +1,9 @@
+   
+			int main(){
+			    if (main()){
+			        main();
+			    	}
+			    else ((main()));
+			}
+			
+			

@@ -1,0 +1,7 @@
+   
+			int main(){
+			//this single-line comment /* a multi-line commment inside*/ 
+			return k;
+			}
+			
+			

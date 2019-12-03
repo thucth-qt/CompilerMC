@@ -1,0 +1,18 @@
+   
+			boolean swap(int a, int b)
+			{ 
+			    int tmp;
+			    tmp = a;
+			    a = b;
+			    b = tmp;
+			    printf(a, b);
+			    return true;
+			}
+			int main(){
+			    int a,b;
+			    boolean result;
+			    result = swap(a,b);
+			    print(result);
+			}
+			
+			

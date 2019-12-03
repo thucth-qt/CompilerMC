@@ -1,0 +1,3 @@
+int main() {
+        foo(foo(foo(foo(foo(0)))));
+        }

@@ -1,0 +1,6 @@
+   
+			void foo(float j[],int i){
+			print(i);
+			}
+			
+			

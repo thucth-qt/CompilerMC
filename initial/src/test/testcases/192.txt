@@ -1,0 +1,10 @@
+   
+			int foo(int  c[]){
+            if (a==c)
+                if (d=f)
+                    if(lv=2) c=d;
+                    else c = a[cc+9];
+                else "disdsi/"/4;
+            else sdji=7/3;
+			
+			

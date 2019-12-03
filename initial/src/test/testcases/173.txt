@@ -1,0 +1,6 @@
+   
+			int date[31],month[12];
+	        int Year(int month[], int date[]){}
+	        boolean PRINT(int a){}
+			
+			

@@ -1,0 +1,1 @@
+string accept legal escape charater\n \b,<EOF>
