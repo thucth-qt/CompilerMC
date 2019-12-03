@@ -1,63 +1,20 @@
 from abc import ABC, abstractmethod, ABCMeta
+from dataclasses import dataclass
+from typing import List
 from Visitor import Visitor
 
 
 class AST(ABC):
     def __eq__(self, other): 
-        return self._
+        return self.__dict__ == other.__dict__
 
     @abstractmethod
     def accept(self, v, param):
         return v.visit(self, param)
 
-class Program(AST):
-    #decl:list(Decl)
-    def __init__(self, decl):
-        self.decl = decl
-    
-    def __str__(self):
-        return "Program([" + ','.join(str(i) for i in self.decl) + "])"
-    
-    def accept(self, v: Visitor, param):
-        return v.visitProgram(self, param)
-
 class Decl(AST):
     __metaclass__ = ABCMeta
     pass
-
-class BlockMember(AST):
-    __metaclass__ = ABCMeta
-    pass
-    
-class VarDecl(Decl,BlockMember):
-    #variable:string
-    #varType: Type
-    def __init__(self, variable, varType):
-        self.variable = variable
-        self.varType = varType
-
-    def __str__(self):
-        return "VarDecl(" + str(self.variable) + "," + str(self.varType) + ")"
-
-    def accept(self, v, param):
-        return v.visitVarDecl(self, param)
-
-class FuncDecl(Decl):
-    #name: Id
-    #param: list(VarDecl)
-    #returnType: Type
-    #body: Block
-    def __init__(self, name, param, returnType, body):
-        self.name = name
-        self.param = param
-        self.returnType = returnType
-        self.body = body
-
-    def __str__(self):
-        return "FuncDecl(" + str(self.name) + ",[" +  ','.join(str(i) for i in self.param) + "]," + str(self.returnType) + "," + str(self.body) + ")"
-    
-    def accept(self, v, param):
-        return v.visitFuncDecl(self, param)
 
 class Type(AST):
     __metaclass__ = ABCMeta
@@ -98,12 +55,10 @@ class VoidType(Type):
     def accept(self, v, param):
         return v.visitVoidType(self, param)
 
+@dataclass
 class ArrayType(Type):
-    #dimen:int
-    #eleType:Type
-    def __init__(self, dimen, eleType):
-        self.dimen = dimen
-        self.eleType = eleType
+    dimen:int
+    eleType:Type
         
     def __str__(self):
         return "ArrayType(" + str(self.eleType) + "," + str(self.dimen) + ")"
@@ -111,16 +66,19 @@ class ArrayType(Type):
     def accept(self, v, param):
         return v.visitArrayType(self, param)
 
+@dataclass
 class ArrayPointerType(Type):
-    #eleType:Type
-    def __init__(self, eleType):
-        self.eleType = eleType
+    eleType:Type
         
     def __str__(self):
         return "ArrayTypePointer(" + str(self.eleType) + ")"
 
     def accept(self, v, param):
         return v.visitArrayPointerType(self, param)
+
+class BlockMember(AST):
+    __metaclass__ = ABCMeta
+    pass
 
 class Stmt(BlockMember):
     __metaclass__ = ABCMeta
@@ -130,57 +88,13 @@ class Expr(Stmt):
     __metaclass__ = ABCMeta
     pass
 
-class BinaryOp(Expr):
-    #op:string
-    #left:Expr
-    #right:Expr
-    def __init__(self, op, left, right):
-        self.op = op
-        self.left = left
-        self.right = right
-
-    def __str__(self):
-        return "BinaryOp(" + self.op + "," + str(self.left) + "," + str(self.right) + ")"
-
-    def accept(self, v, param):
-        return v.visitBinaryOp(self, param)
-
-class UnaryOp(Expr):
-    #op:string
-    #body:Expr
-    def __init__(self, op, body):
-        self.op = op
-        self.body = body
-
-    def __str__(self):
-        return "UnaryOp(" + self.op + "," + str(self.body) + ")"
-
-    def accept(self, v, param):
-        return v.visitUnaryOp(self, param)
-
-class CallExpr(Expr):
-    #method:Id
-    #param:list(Expr)
-    def __init__(self, method, param):
-        self.method = method
-        self.param = param
-
-    def __str__(self):
-        return "CallExpr(" + str(self.method) + ",[" +  ','.join(str(i) for i in self.param) + "])"
-
-    def accept(self, v, param):
-        return v.visitCallExpr(self, param)
-
-
-
 class LHS(Expr):
     __metaclass__ = ABCMeta
     pass
 
+@dataclass
 class Id(LHS):
-    #name:string
-    def __init__(self, name):
-        self.name = name
+    name : str
 
     def __str__(self):
         return  "Id(" + self.name + ")" 
@@ -188,12 +102,10 @@ class Id(LHS):
     def accept(self, v, param):
         return v.visitId(self, param)
 
+@dataclass
 class ArrayCell(LHS):
-    #arr:Expr
-    #idx:Expr
-    def __init__(self, arr, idx):
-        self.arr = arr
-        self.idx = idx
+    arr:Expr
+    idx:Expr
 
     def __str__(self):
         return "ArrayCell(" + str(self.arr) + "," + str(self.idx) + ")"
@@ -201,10 +113,84 @@ class ArrayCell(LHS):
     def accept(self, v, param):
         return v.visitArrayCell(self, param)
 
+@dataclass
+class BinaryOp(Expr):
+    op:str
+    left:Expr
+    right:Expr
+
+    def __str__(self):
+        return "BinaryOp(" + self.op + "," + str(self.left) + "," + str(self.right) + ")"
+
+    def accept(self, v, param):
+        return v.visitBinaryOp(self, param)
+@dataclass
+class UnaryOp(Expr):
+    op:str
+    body:Expr
+
+    def __str__(self):
+        return "UnaryOp(" + self.op + "," + str(self.body) + ")"
+
+    def accept(self, v, param):
+        return v.visitUnaryOp(self, param)
+
+@dataclass
+class CallExpr(Expr):
+    method:Id
+    param:List[Expr]
+
+    def __str__(self):
+        return "CallExpr(" + str(self.method) + ",[" +  ','.join(str(i) for i in self.param) + "])"
+
+    def accept(self, v, param):
+        return v.visitCallExpr(self, param)
+
+class Literal(Expr):
+    __metaclass__ = ABCMeta
+    pass
+
+@dataclass
+class IntLiteral(Literal):
+    value:int
+
+    def __str__(self):
+        return "IntLiteral(" + str(self.value) + ")"
+
+    def accept(self, v, param):
+        return v.visitIntLiteral(self, param)
+
+@dataclass
+class FloatLiteral(Literal):
+    value:float
+
+    def __str__(self):
+        return "FloatLiteral(" + str(self.value) + ")"
+
+    def accept(self, v, param):
+        return v.visitFloatLiteral(self, param)
+@dataclass
+class StringLiteral(Literal):
+    value:str
+
+    def __str__(self):
+        return "StringLiteral(" + self.value + ")"
+
+    def accept(self, v, param):
+        return v.visitStringLiteral(self, param)
+@dataclass
+class BooleanLiteral(Literal):
+    value:bool
+
+    def __str__(self):
+        return "BooleanLiteral(" + str(self.value).lower() + ")"
+
+    def accept(self, v, param):
+        return v.visitBooleanLiteral(self, param)
+
+@dataclass
 class Block(Stmt):
-    #decl:list(BlockMember)
-    def __init__(self, member):
-        self.member = member
+    member:List[BlockMember]
 
     def __str__(self):
         return "Block([" + ','.join(str(i) for i in self.member)  + "])"
@@ -212,14 +198,11 @@ class Block(Stmt):
     def accept(self, v, param):
         return v.visitBlock(self, param)
 
+@dataclass
 class If(Stmt):
-    #expr:Expr
-    #thenStmt:Stmt
-    #elseStmt:Stmt
-    def __init__(self, expr, thenStmt, elseStmt=None):
-        self.expr = expr
-        self.thenStmt = thenStmt
-        self.elseStmt = elseStmt
+    expr:Expr
+    thenStmt:Stmt
+    elseStmt:Stmt = None
 
     def __str__(self):
         return "If(" + str(self.expr) + "," + str(self.thenStmt) + ("" if (self.elseStmt is None) else "," + str(self.elseStmt)) + ")"
@@ -227,14 +210,12 @@ class If(Stmt):
     def accept(self, v, param):
         return v.visitIf(self, param)
 
+@dataclass
 class For(Stmt):
-    #expr1,expr2,expr3:Expr
-    #loop:Stmt
-    def __init__(self, expr1, expr2, expr3, loop):
-        self.expr1 = expr1
-        self.expr2 = expr2
-        self.expr3 = expr3
-        self.loop = loop
+    expr1:Expr
+    expr2:Expr
+    expr3:Expr
+    loop:Stmt
 
     def __str__(self):
         return "For(" + str(self.expr1) + ";" + str(self.expr2) + ";" + str(self.expr3) + ";" + str(self.loop) + ")"
@@ -256,10 +237,9 @@ class Continue(Stmt):
     def accept(self, v, param):
         return v.visitContinue(self, param)
 
+@dataclass
 class Return(Stmt):
-    #expr:Expr
-    def __init__(self, expr = None):
-        self.expr = expr
+    expr:Expr = None
 
     def __str__(self):
         return "Return(" + ("" if (self.expr is None) else str(self.expr)) + ")"
@@ -267,12 +247,10 @@ class Return(Stmt):
     def accept(self, v, param):
         return v.visitReturn(self, param)
 
+@dataclass
 class Dowhile(Stmt):
-    #sl:list(Stmt)
-    #exp: Expr
-    def __init__(self, sl, exp):
-        self.sl = sl
-        self.exp = exp
+    sl:List[Stmt]
+    exp: Expr
 
     def __str__(self):
         return "Dowhile([" + ','.join(str(i) for i in self.sl) + "]," + str(self.exp) + ")"
@@ -280,53 +258,38 @@ class Dowhile(Stmt):
     def accept(self, v, param):
         return v.visitDowhile(self, param)
 
-
-class Literal(Expr):
-    __metaclass__ = ABCMeta
-    pass
-
-class IntLiteral(Literal):
-    #value:int
-    def __init__(self, value):
-        self.value = value
+@dataclass    
+class VarDecl(Decl,BlockMember):
+    variable : str
+    varType : Type
 
     def __str__(self):
-        return "IntLiteral(" + str(self.value) + ")"
+        return "VarDecl(" + str(self.variable) + "," + str(self.varType) + ")"
 
     def accept(self, v, param):
-        return v.visitIntLiteral(self, param)
+        return v.visitVarDecl(self, param)
 
-class FloatLiteral(Literal):
-    #value:float
-    def __init__(self, value):
-        self.value = value
+@dataclass
+class FuncDecl(Decl):
+    name: Id
+    param: List[VarDecl]
+    returnType: Type
+    body: Block
 
     def __str__(self):
-        return "FloatLiteral(" + str(self.value) + ")"
-
+        return "FuncDecl(" + str(self.name) + ",[" +  ','.join(str(i) for i in self.param) + "]," + str(self.returnType) + "," + str(self.body) + ")"
+    
     def accept(self, v, param):
-        return v.visitFloatLiteral(self, param)
+        return v.visitFuncDecl(self, param)
 
-class StringLiteral(Literal):
-    #value:string
-    def __init__(self, value):
-        self.value = value
+@dataclass
+class Program(AST):
+    decl : List[Decl]
 
     def __str__(self):
-        return "StringLiteral(" + self.value + ")"
-
-    def accept(self, v, param):
-        return v.visitStringLiteral(self, param)
-
-class BooleanLiteral(Literal):
-    #value:boolean
-    def __init__(self, value):
-        self.value = value
-
-    def __str__(self):
-        return "BooleanLiteral(" + str(self.value).lower() + ")"
-
-    def accept(self, v, param):
-        return v.visitBooleanLiteral(self, param)
+        return "Program([" + ','.join(str(i) for i in self.decl) + "])"
+    
+    def accept(self, v: Visitor, param):
+        return v.visitProgram(self, param)
 
 

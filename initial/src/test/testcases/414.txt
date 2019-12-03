@@ -1,0 +1,9 @@
+
+        void main(){
+            for (
+            true; //error
+            true;
+            5
+            ){} 
+        }
+        

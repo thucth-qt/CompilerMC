@@ -1,9 +1,0 @@
-   
-			int main(){
-			/* a multi-line commment 
-			here // there is a single-line comment
-			ok	
-			*/ 
-			return something;	
-			}		
-			

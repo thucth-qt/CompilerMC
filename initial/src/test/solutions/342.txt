@@ -1,1 +1,0 @@
-Program([FuncDecl(Id(main),[],IntType,Block([VarDecl(a,IntType),VarDecl(b,ArrayType(FloatType,3)),VarDecl(c,StringType),VarDecl(d,ArrayType(StringType,3))]))])

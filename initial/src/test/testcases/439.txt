@@ -1,0 +1,7 @@
+
+        boolean main(){
+            string a;
+            a="hihihi";
+            return  a == "hihihi"; //error, no == Op on string type
+        }
+        

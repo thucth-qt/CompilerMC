@@ -1,0 +1,14 @@
+
+        void foo(){}
+        int a;
+        void main(int a){
+            foo();
+            int foo;
+            {
+                float a;
+            }
+            foo=a;
+        }
+        int putFloat(int k){return 1;} //error
+        
+        

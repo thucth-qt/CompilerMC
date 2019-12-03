@@ -1,0 +1,10 @@
+
+        int main(){ 
+            int i;
+            i=1;
+            if (i==5) return 1;
+            else 
+                if (true) return 1;
+                else return 1;
+        }
+        

@@ -235,8 +235,7 @@ FLOATLIT: Digit* '.'? Digit+ Exponent?
 	fragment Exponent: ('e'|'E') '-'? Digit+;
 
 BOOLIT 	: TRUE | FALSE;
-// thắc mắc 1: ví dụ với input :  "abc""def" thì lexer cần phải recog ra cái gì???
-//thắc mắc 2: nếu ở trên recog ra string1: abc, string2: def thì với input "abc"def" sẽ ra cái gì???
+
 // string lit này k chấp nhận có dấu " trong chuỗi, chỉ chấp nhập dấu \" trong chuỗi.
 STRINGLIT	: '"' (~[\b\r\n\f\t"\\] |ESCAPE)* '"'
 				{

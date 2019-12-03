@@ -1,6 +1,0 @@
-   
-			float number;
-			boolean check;
-			int arr[4],num,brr[5];
-			
-			

@@ -1,7 +1,0 @@
-   
-			string i;
-			float abc;
-			boolean array[1];
-
-			
-			

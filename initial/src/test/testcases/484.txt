@@ -1,0 +1,9 @@
+
+        int foo(){
+            return 3000;
+        }
+        void main(){
+            float a[10];
+            a[foo()]=1;
+        }
+        

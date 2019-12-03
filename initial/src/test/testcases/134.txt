@@ -1,8 +1,0 @@
-   
-			
-			int print(int k){
-			int a;
-			return a;
-			}
-			
-			

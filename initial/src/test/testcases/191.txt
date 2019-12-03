@@ -1,8 +1,0 @@
-   
-			int main(){
-            if(a>c)
-                if (!c) c+x;
-                else d+s;
-            else true;
-			
-			

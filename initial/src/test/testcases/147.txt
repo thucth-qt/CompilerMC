@@ -1,4 +1,0 @@
-   
-			void main(string k[]) { if(!((true) * false)) foo(0)=a[7]; else return true;}
-			
-			

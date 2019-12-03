@@ -1,0 +1,10 @@
+
+        void foo(){
+            return;
+            int a;
+            a=1; //error
+        }
+        void main(){
+            foo();
+        }
+        

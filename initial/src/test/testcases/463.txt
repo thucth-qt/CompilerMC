@@ -1,0 +1,9 @@
+
+        void foo1(){}
+        void foo2(){
+            foo1();
+        }
+        void main(){
+            foo2();
+        }
+        

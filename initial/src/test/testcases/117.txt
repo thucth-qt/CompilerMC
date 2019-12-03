@@ -1,6 +1,0 @@
-   
-			int main(){
-			// comment 1 // comment neseted // something
-			}
-			
-			

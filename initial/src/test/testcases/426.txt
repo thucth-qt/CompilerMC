@@ -1,0 +1,6 @@
+
+        void main(){
+            int arr[10];
+            arr[2+2.5]=1; //error
+        }
+        

@@ -1,7 +1,0 @@
-   
-			int data_1;
-			void main(){
-			foo(2);
-			}
-			
-			

@@ -1,0 +1,10 @@
+
+        void main(){
+            int a;
+            a=1;
+            float b;
+            b=1.5;
+            boolean k;
+            k = a == b; //error, must the same type int
+        }
+        

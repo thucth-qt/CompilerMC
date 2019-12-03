@@ -1,0 +1,5 @@
+
+        float main(int a, string b, float c, string d[]){
+            return c;
+        }
+        

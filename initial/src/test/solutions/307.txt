@@ -1,1 +1,0 @@
-Program([VarDecl(a,StringType),VarDecl(b,ArrayType(BoolType,3))])

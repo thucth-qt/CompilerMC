@@ -1,1 +1,0 @@
-Program([FuncDecl(Id(ucln),[VarDecl(a,IntType),VarDecl(b,IntType)],IntType,Block([VarDecl(u,IntType),If(BinaryOp(<,Id(a),Id(b)),BinaryOp(=,Id(u),Id(a)),BinaryOp(=,Id(u),Id(b))),Dowhile([BinaryOp(=,Id(u),BinaryOp(-,Id(u),IntLiteral(1)))],BinaryOp(||,BinaryOp(!=,BinaryOp(%,Id(a),Id(u)),IntLiteral(0)),BinaryOp(!=,BinaryOp(%,Id(b),Id(u)),IntLiteral(0))))]))])

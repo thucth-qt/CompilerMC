@@ -1,0 +1,8 @@
+
+        void foo(int a){
+            int a; //error
+        }
+        void main(){
+            foo();
+        }
+        

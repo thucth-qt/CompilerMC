@@ -1,0 +1,7 @@
+
+        void a(){}
+        int a;//error
+        void main(){
+            a();
+        }
+        

@@ -1,0 +1,5 @@
+
+        void main(){
+            true=1+2; //error
+        }
+        

@@ -1,17 +1,19 @@
 import sys,os
 from antlr4 import *
 from antlr4.error.ErrorListener import ConsoleErrorListener,ErrorListener
-#if not './main/mc/parser/' in sys.path:
-#    sys.path.append('./main/mc/parser/')
-#if os.path.isdir('../target/main/mc/parser') and not '../target/main/mc/parser/' in sys.path:
-#    sys.path.append('../target/main/mc/parser/')
+if not './main/mc/parser/' in sys.path:
+    sys.path.append('./main/mc/parser/')
+if os.path.isdir('../target/main/mc/parser') and not '../target/main/mc/parser/' in sys.path:
+    sys.path.append('../target/main/mc/parser/')
 from MCLexer import MCLexer
 from MCParser import MCParser
 from lexererr import *
 from ASTGeneration import ASTGeneration
+from StaticCheck import StaticChecker
+from StaticError import *
 
-class TestUtil: 
-    @staticmethod #viet test case vao file txt
+class TestUtil:
+    @staticmethod
     def makeSource(inputStr,num):
         filename = "./test/testcases/" + str(num) + ".txt"
         file = open(filename,"w")
@@ -20,7 +22,7 @@ class TestUtil:
         return FileStream(filename)
 
 
-class TestLexer: #so trung ket qua trong solution
+class TestLexer:
     @staticmethod
     def checkLexeme(input,expect,num):
         inputfile = TestUtil.makeSource(input,num)
@@ -54,7 +56,7 @@ class SyntaxException(Exception):
     def __init__(self,msg):
         self.message = msg
 
-class TestParser: #so trung ket qua trong solutions
+class TestParser:
     @staticmethod
     def createErrorListener():
          return NewErrorListener.INSTANCE
@@ -84,7 +86,7 @@ class TestParser: #so trung ket qua trong solutions
         line = dest.read()
         return line == expect
 
-class TestAST: #so trung ket qua voi trong solutions
+class TestAST:
     @staticmethod
     def checkASTGen(input,expect,num):
         inputfile = TestUtil.makeSource(input,num)
@@ -94,9 +96,40 @@ class TestAST: #so trung ket qua voi trong solutions
         parser = MCParser(tokens)
         tree = parser.program()
         asttree = ASTGeneration().visit(tree)
-        dest.write(str(asttree))
+        #dest.write(str(asttree))
         dest.close()
         dest = open("./test/solutions/" + str(num) + ".txt","r")
         line = dest.read()
         return line == expect
+
+
+
+class TestChecker:
+    @staticmethod
+    def test(input,expect,num):
+        dest = open("./test/solutions/" + str(num) + ".txt","w")
         
+        if type(input) is str:
+            inputfile = TestUtil.makeSource(input,num)
+            lexer = MCLexer(inputfile)
+            tokens = CommonTokenStream(lexer)
+            parser = MCParser(tokens)
+            tree = parser.program()
+            asttree = ASTGeneration().visit(tree)
+        else:
+            inputfile = TestUtil.makeSource(str(input),num)
+            asttree = input
+        
+        
+        checker = StaticChecker(asttree)
+        try:
+            res = checker.check()
+            #dest.write("OK")
+        except StaticError as e:
+            dest.write(str(e))
+
+        finally:
+            dest.close()
+        dest = open("./test/solutions/" + str(num) + ".txt","r")
+        line = dest.read()
+        return line == expect

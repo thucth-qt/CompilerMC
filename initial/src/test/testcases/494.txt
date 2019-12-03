@@ -1,0 +1,13 @@
+
+        int[] foo(int a) {
+            int b[10];
+            return b;
+        }
+        void main() {
+            int a; 
+            foo(5);         //OK
+            int foo;        //declare variable same nam function foo
+            a = foo(1)[2];  //error
+            return;
+        }
+        

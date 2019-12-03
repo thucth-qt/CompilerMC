@@ -1,0 +1,11 @@
+
+        int k;
+        int main(){
+            int i;
+            i = k;                  //OK
+            for(i=0;i<10;i=i+1){
+                int k;
+                return k;           //error
+            }
+        }
+        

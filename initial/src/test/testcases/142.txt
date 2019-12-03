@@ -1,4 +1,0 @@
-   
-			
-			void main() { if(!true) a=5; else {}}
-			

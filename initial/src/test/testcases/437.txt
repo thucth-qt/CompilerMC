@@ -1,0 +1,6 @@
+
+        float main(){
+            float a;
+            return a=5; //OK, The assign operator = which results in a value of type float if the left hand side operand is in type float
+        }
+        

@@ -1,0 +1,19 @@
+
+
+        int main(int args[]){
+            
+            int i,len,arr[100];
+            //get length of array
+            len = getInt();
+            //enter array
+            for (i=0;i<len;i=i+1){
+                arr[i]=getInt();
+            }
+            //print array
+            for (i=0;i<len;i=i+1){
+                putFloat(arr[i]);   
+            }
+            return 1;
+            
+        }
+        

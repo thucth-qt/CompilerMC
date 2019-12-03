@@ -1,0 +1,9 @@
+
+        boolean main(){
+            boolean a,b;
+            a= true;
+            b= false;
+            b= a + b; //error, not plus Op on boolean type
+            return b; 
+        }
+        

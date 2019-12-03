@@ -1,1 +1,0 @@
- //this is single-line comment, and /* a multi-line comment inside */  

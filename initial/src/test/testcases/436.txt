@@ -1,0 +1,8 @@
+
+        void main(){
+            float a;
+            a=1;
+            boolean b;
+            b = a==a; //error, no Equal Op on float type
+        }
+        

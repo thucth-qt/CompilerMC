@@ -1,0 +1,6 @@
+
+        void foo1(){}
+        void main(){
+            foo1=5; //error
+        }
+        

@@ -1,7 +1,0 @@
-   
-			int main(){
-			int successful;
-			successful = int;
-			}
-			
-			

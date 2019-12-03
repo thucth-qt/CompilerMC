@@ -1,6 +1,0 @@
-   
-			int main(){
-            	do a=c; d=5; do i=i+3;c+d; while c!=9; while a;
-        	}
-			
-			

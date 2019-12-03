@@ -1,1 +1,0 @@
-Program([FuncDecl(Id(main),[],VoidType,Block([IntLiteral(1),Id(a),FloatLiteral(0.01)]))])

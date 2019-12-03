@@ -1,1 +1,0 @@
-Program([FuncDecl(Id(main),[],IntType,Block([BinaryOp(=,BinaryOp(!=,BinaryOp(=,Id(a),BinaryOp(==,Id(b),Id(c))),Id(d)),Id(e))]))])

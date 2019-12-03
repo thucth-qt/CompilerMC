@@ -1,7 +1,0 @@
-   
-			boolean a;
-	        boolean a[2];
-	        string a;
-	        boolean b[3];
-			
-			

@@ -1,7 +1,0 @@
-   
-	        int float2int(float a){}
-	        int a(int a[], int b, float c[], string d){}
-	        float b(){}
-	        int c(string c[], int a, int b){}
-				
-			

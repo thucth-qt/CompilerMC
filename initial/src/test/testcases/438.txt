@@ -1,0 +1,9 @@
+
+        float main(){
+            float a;
+            a=1.5;
+            boolean b;
+            b= (a<a) ||(a<=a) ||(a> a) || (a>=a);
+            return a +a -a *a / -a;  
+        }
+        

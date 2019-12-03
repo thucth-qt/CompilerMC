@@ -1,8 +1,0 @@
-   
-			int foo(){
-			for(i=0;i<=8;i=i+1)
-				data=data+1;
-			return data;
-			}
-			
-			

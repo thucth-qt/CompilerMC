@@ -1,0 +1,9 @@
+
+        void main(){
+            if (true) return;
+            else return;
+            int k;
+            k=5;//error
+        }
+
+        

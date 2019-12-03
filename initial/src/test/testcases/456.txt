@@ -1,0 +1,10 @@
+
+        void main(){
+            int i;
+            continue; //error
+            do
+            //something
+            i=3;
+            while (true);
+        }
+        

@@ -1,2 +1,0 @@
-Program([FuncDecl(Id(array),[VarDecl(a,IntType),VarDecl(b,IntType)],ArrayTypePointer(IntType),Block([VarDecl(arr,ArrayType(IntType,2)),BinaryOp(=,ArrayCell(Id(arr),IntLiteral(0)),Id(a)),BinaryOp(=,ArrayCell(Id(arr),IntLiteral(1)),Id(b)),Return(Id(arr))]))])
-Program([FuncDecl(Id("array"),[VarDecl(Id("a"),IntType()),VarDecl(Id("b"),IntType())],ArrayPointerType(IntType()),Block([VarDecl(Id("arr"),ArrayType(IntLiteral(2),IntType())),BinaryOp("=",ArrayCell(Id("arr"),IntLiteral(0)),Id("a")),BinaryOp("=",ArrayCell(Id("arr"),IntLiteral(1)),Id("b")),Return(Id("arr"))]))])

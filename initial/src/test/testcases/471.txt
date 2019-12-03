@@ -1,0 +1,9 @@
+
+        void foo(){}
+        void main(){
+            if (true){
+                return;
+                foo();//error
+            }
+        }
+        

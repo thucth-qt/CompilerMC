@@ -1,7 +1,0 @@
-
-void testLexer(){
-	string x;
-	x = "this is a string";//for check string;
-	x=a*c-(3-z)/0+"this is a string";
-}
-			

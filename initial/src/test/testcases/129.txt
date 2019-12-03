@@ -1,7 +1,0 @@
-   
-			int foo(){
-			string k;
-			k="abd\n,,,,,,,,,,";
-			}
-			
-			

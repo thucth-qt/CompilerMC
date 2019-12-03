@@ -1,1 +1,0 @@
-Program([FuncDecl(Id(main),[],IntType,Block([Block([Block([Block([Block([Block([Return(IntLiteral(0))])])])])])]))])

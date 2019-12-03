@@ -1,0 +1,8 @@
+
+        void main(){
+            boolean b;
+            b=true;
+            int a[10];
+            if(b == true &&false || (a[1]!=2) ){}
+        }
+        

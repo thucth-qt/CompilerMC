@@ -1,0 +1,11 @@
+
+        void main() {
+            int a,b;
+            for (1;true;2){
+                {a=4;}
+                b=a+1; // OK, not uninitialized error
+                break;
+            }
+            
+        }
+        

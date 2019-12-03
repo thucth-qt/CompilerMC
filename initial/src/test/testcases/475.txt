@@ -1,0 +1,12 @@
+
+        void main(int a){
+            do
+                if (false){
+                    a=1;
+                    continue;
+                }
+                else return;
+                a=1000; //error
+            while(false);
+        }
+        

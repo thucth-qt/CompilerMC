@@ -1,0 +1,9 @@
+
+        boolean main(){
+            boolean a,b;
+            a= true;
+            b= false;
+            b = a == ( !b != a && a) || b; 
+            return b; 
+        }
+        

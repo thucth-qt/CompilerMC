@@ -1,0 +1,7 @@
+
+        void main(){
+            int _int_a;
+            _int_a =5;
+            _int_a[10]=1; //error
+        }
+        

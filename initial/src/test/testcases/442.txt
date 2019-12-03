@@ -1,0 +1,7 @@
+
+        void foo(float a, int b[]){}
+        void main(){
+            int k[10];
+            foo(1,k);
+        }
+        
