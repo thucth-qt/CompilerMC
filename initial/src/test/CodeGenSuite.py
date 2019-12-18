@@ -10,8 +10,7 @@ class CheckCodeGenSuite(unittest.TestCase):
 
         int a;
         void main() {
-            // a=10;
-            //putInt(a);  
+             
             a=1;
             putIntLn(a);
             {
