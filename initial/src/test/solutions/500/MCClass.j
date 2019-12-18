@@ -6,22 +6,12 @@
 .var 0 is i I from Label0 to Label1
 Label0:
 .var 1 is j I from Label0 to Label1
-	iconst_1
-	ifgt Label2
-	goto Label4
-Label2:
-	bipush 100
-	invokestatic io/putInt(I)V
-	goto Label3
-Label4:
-	sipush 200
-	invokestatic io/putInt(I)V
-Label3:
+.var 2 is j I from Label0 to Label1
 	iconst_1
 	ireturn
 Label1:
-.limit stack 2
-.limit locals 2
+.limit stack 1
+.limit locals 3
 .end method
 
 .method public static main([Ljava/lang/String;)V

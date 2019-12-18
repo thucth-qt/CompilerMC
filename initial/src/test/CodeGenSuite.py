@@ -9,15 +9,9 @@ class CheckCodeGenSuite(unittest.TestCase):
         input = """
         int foo(int i){
             int j;
-            /*for (j=0; j<10; j=j+1){
-                putInt(j);
-                if (j>5) break;
-                putString("\\n");
-            } */
-            if (true)
-                putInt(100);
-            else
-                putInt(200);
+            {
+                int j;
+            }
             return 1;
         }
 

@@ -244,70 +244,96 @@ class CodeGenVisitor(BaseVisitor, Utils):
         labelFalse = o.frame.getNewLabel()
         self.emit.printout(self.emit.emitIFTRUE(labelTrue, o.frame))
 
-        self.emit.printout(self.emit.emitGOTO(labelFalse, o.frame))
+        # self.emit.printout(self.emit.emitGOTO(labelFalse, o.frame))
+        if ast.elseStmt is not None:
+            self.visit(ast.elseStmt,o)
+
+        self.emit.printout(self.emit.emitGOTO(labelEnd, o.frame))
         
         self.emit.printout(self.emit.emitLABEL(labelTrue, o.frame))
         
         self.visit(ast.thenStmt,o)
-
-        self.emit.printout(self.emit.emitGOTO(labelEnd, o.frame))
-        
-        self.emit.printout(self.emit.emitLABEL(labelFalse, o.frame))
-
-        if ast.elseStmt is not None:
-            self.visit(ast.elseStmt,o)
         
         self.emit.printout(self.emit.emitLABEL(labelEnd, o.frame))
 
     def visitDowhile(self, ast:Dowhile, o: SubBody):
+        '''
+        1. Label Start
+        2. visit list stmt
+        3. Label Continue
+        4. visit Expr
+        5. if True go to Label Start
+        6. Label Break
+        
+        '''
         labelStart = o.frame.getNewLabel()
         
-        self.emit.printout(self.emit.emitLABEL(labelStart, o.frame))
-
         o.frame.enterLoop()
 
+        self.emit.printout(self.emit.emitLABEL(labelStart, o.frame))
+
         [self.visit(x, o) for x in ast.sl]
+
+        self.emit.printout(self.emit.emitLABEL(o.frame.getContinueLabel(), o.frame))
 
         expCode, expType = self.visit(ast.exp, Access(o.frame, o.sym, False, False))
 
         self.emit.printout(expCode)
         
-        self.emit.emitLABEL(o.frame.getContinueLabel(), o.frame)
-        
         self.emit.printout(self.emit.emitIFTRUE(labelStart, o.frame))
         
-        self.emit.emitLABEL(o.frame.getBreakLabel(), o.frame)
+        self.emit.printout(self.emit.emitLABEL(o.frame.getBreakLabel(), o.frame))
         
         o.frame.exitLoop()
         
     def visitFor(self, ast: For, o: SubBody):
-        labelStmt  = o.frame.getNewLabel()
+        '''
+        1.visit expr 1 (like visit a stmt: visit(ast, SubBody) because this is assign op)
+        2.Label condition
+        3.visit expr 2 (like visit a expr: visit(ast, Access)) 
+        4.if True goto Label True
+        5.go to Label Break (the same purpose with Label End)
+        6.Label True
+        7.visit Stmt
+        8.Label Continue
+        9.visit expr3 (like visit a stmt: visit(ast, SubBody))
+        10. go to Label condition
+        11. Label Break
+
+        '''
+        labelTrue  = o.frame.getNewLabel()
         labelCondition = o.frame.getNewLabel()
-        labelEnd    = o.frame.getNewLabel()
         o.frame.enterLoop()
         labelBreak = o.frame.getBreakLabel()
         labelContinue = o.frame.getContinueLabel()
-        expr1Code, expr1Type = self.visit(ast.expr1, Access(o.frame, o.sym, False, False))
-        self.emit.printout(expr1Code)
+
+        self.visit(ast.expr1,o)
         self.emit.printout(self.emit.emitLABEL(labelCondition, o.frame))
         expr2Code, expr2Type = self.visit(ast.expr2, Access(o.frame, o.sym, False, False))
         self.emit.printout(expr2Code)
-        self.emit.printout(self.emit.emitIFTRUE(labelStmt, o.frame))
-        self.emit.printout(self.emit.emitGOTO(labelEnd, o.frame))
-        self.emit.printout(self.emit.emitLABEL(labelStmt, o.frame))
+        self.emit.printout(self.emit.emitIFTRUE(labelTrue, o.frame))
+        self.emit.printout(self.emit.emitGOTO(labelBreak, o.frame))
+        self.emit.printout(self.emit.emitLABEL(labelTrue, o.frame))
         self.visit(ast.loop, o)
         self.emit.printout(self.emit.emitLABEL(labelContinue, o.frame))
         self.visit(ast.expr3, o)
         self.emit.printout(self.emit.emitGOTO(labelCondition, o.frame))
-        self.emit.printout(self.emit.emitLABEL(labelEnd, o.frame))
         self.emit.printout(self.emit.emitLABEL(labelBreak, o.frame))
 
         o.frame.exitLoop()
 
     def visitBreak(self, ast: Break, o: SubBody):
+        '''
+        when enter the loop, we call frame.enterLoop to create BreakLabel
+        and then we placed it in some place
+        '''
         self.emit.printout(self.emit.emitGOTO(o.frame.getBreakLabel(), o.frame))
     
     def visitContinue(self, ast: Continue, o:SubBody):
+        '''
+        when enter the loop, we call frame.enterLoop to create ContinueLabel
+        and then we placed it in some place
+        '''
         self.emit.printout(self.emit.emitGOTO(o.frame.getContinueLabel(),o.frame))
 
     def visitBlock(self, ast: Block, o: SubBody):
