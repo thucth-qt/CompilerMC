@@ -1,40 +1,28 @@
 .source MCClass.java
 .class public MCClass
 .super java.lang.Object
-
-.method public static foo(I)I
-.var 0 is i I from Label0 to Label1
-Label0:
-.var 1 is j I from Label0 to Label1
-	iconst_5
-	istore_1
-	iload_1
-	invokestatic io/putInt(I)V
-Label2:
-.var 2 is j I from Label2 to Label3
-	bipush 6
-	istore_2
-	iload_2
-	invokestatic io/putInt(I)V
-Label3:
-	iload_1
-	invokestatic io/putInt(I)V
-	iconst_1
-	ireturn
-Label1:
-.limit stack 1
-.limit locals 3
-.end method
+.field static a I
 
 .method public static main([Ljava/lang/String;)V
 .var 0 is args [Ljava/lang/String; from Label0 to Label1
 Label0:
-	bipush 10
-	invokestatic MCClass/foo(I)I
+	iconst_1
+	putstatic MCClass.a I
+	getstatic MCClass.a I
+	invokestatic io/putIntLn(I)V
+Label2:
+.var 1 is a I from Label2 to Label3
+	iconst_2
+	istore_1
+	iload_1
+	invokestatic io/putIntLn(I)V
+Label3:
+	getstatic MCClass.a I
+	invokestatic io/putIntLn(I)V
 Label1:
 	return
 .limit stack 1
-.limit locals 1
+.limit locals 2
 .end method
 
 .method public <init>()V

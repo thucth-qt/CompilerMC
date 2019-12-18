@@ -7,23 +7,21 @@ class CheckCodeGenSuite(unittest.TestCase):
     def test_int(self):
         """Simple program: int main() {} """
         input = """
-        int foo(int i){
-            int j;
-            j=5;
-            putInt(j);
-            
-            {
-                int j;
-                j=6;
-                putInt(j);
-            }
-            putInt(j);
-            return 1;
-        }
 
+        int a;
         void main() {
-            foo(10);
+            // a=10;
+            //putInt(a);  
+            a=1;
+            putIntLn(a);
+            {
+                int a;
+                a=2;
+                putIntLn(a);
+            }
+            putIntLn(a);
         }
+        //int b;
         """
         expect = "ahihihi"
         self.assertTrue(TestCodeGen.test(input,expect,500))
