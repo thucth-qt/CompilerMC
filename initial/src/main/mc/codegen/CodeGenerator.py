@@ -67,7 +67,6 @@ class Access():
         self.isLeft = isLeft
         self.isFirst = isFirst
 
-
 class Val(ABC):
     pass
 
@@ -95,6 +94,16 @@ class CodeGenVisitor(BaseVisitor, Utils):
         self.path = dir_
         self.emit = Emitter(self.path + "/" + self.className + ".j") #accept input that file MCClass.j
 
+#==================================Declaration===================================
+    '''
+    this section is to visit Declaration for generating drectives:
+
+        .source MCClass.java
+        .class public MCClass
+        .super java.lang.Object
+        .method public static foo(I)I
+
+    '''
     def visitProgram(self, ast, gloenvi):
         #ast: Program
         #gloenvi: Any
@@ -111,30 +120,10 @@ class CodeGenVisitor(BaseVisitor, Utils):
         return gloenvi
 
     def visitFuncDecl(self, ast, subBody):
-        #ast: FuncDecl
-        #subBody: frame + list(Symbol)
-
-        # subctxt = subBody
-        # if subctxt.frame is not None:
-        #     frame = Frame(ast.name.name, ast.returnType)
-        #     print(ast.name.name)
-        #     self.genMETHOD(ast, subctxt.sym, frame)
-        # else:
-        #     return SubBody(None, [Symbol(ast.name, MType([x.varType for x in ast.param], ast.returnType), CName(self.className))] + subctxt.sym)
-
+        
         frame = Frame(ast.name.name, ast.returnType) #Frame('main', void)
         self.genMETHOD(ast, subBody.sym, frame)
         return SubBody(None, [Symbol(ast.name.name, MType([x.varType for x in ast.param] if ast.name.name not in ['main','<init>'] else list(), ast.returnType), CName(self.className))] + subBody.sym)
-
-        # subctxt = subBody
-        # frame = subctxt.frame
-        # if frame is not None:
-        #     frame = Frame(ast.name.name, ast.returnType)
-        #     self.genMETHOD(ast, subctxt.sym, frame)
-        # else:
-        #     return SubBody(None, [
-        #             Symbol(ast.name.name, MType([x.varType for x in ast.param], ast.returnType), CName(self.className))
-        #         ] + subctxt.sym)
     
     def genMETHOD(self, ast,envi, frame):
         #ast: FuncDecl
@@ -214,11 +203,16 @@ class CodeGenVisitor(BaseVisitor, Utils):
             self.emit.printout(self.emit.emitVAR(index, ast.variable, ast.varType, sBody.frame.getStartLabel(), sBody.frame.getEndLabel(), sBody.frame))
             return SubBody(sBody.frame, [Symbol(ast.variable, ast.varType, Index(index))] + sBody.sym)
 
+#==================================Statement=====================================
+    '''
+    this section is to visit Statement:
+        - Return nothing
+        - printout rigth when visit
+    '''
 
-    #==================================Statement=====================================
-
-    #generate Return for methods different VoidType and not in main function
     def visitReturn(self, ast: Return, o: SubBody):
+        '''generate Return for methods different VoidType and not in main function'''
+
         ctxt = o
         frame = ctxt.frame
         nenv = ctxt.sym
@@ -226,17 +220,22 @@ class CodeGenVisitor(BaseVisitor, Utils):
 
         if (not isinstance(retType, VoidType)) and (frame.name != "main"):
             expCode, expType = self.visit(ast.expr, Access(frame, nenv, False, False))
-            # print(frame.currOpStackSize)
             if type(retType) is FloatType and type(expType) is IntType:
                 expCode = expCode + self.emit.emitI2F(frame)
             self.emit.printout(expCode)
             self.emit.printout(self.emit.emitRETURN(retType, frame))
-
-        ## self.emit.printout(self.emit.emitGOTO(frame.getEndLabel(), frame))
-        #return True
-        return None
     
     def visitIf(self, ast: If, o: SubBody):
+        '''
+            1. visit expr
+            2. if true go to label 1
+            3. do elseStmt
+            4. go to label 2
+            5.Label 1
+            6. do thenStmt
+            7.Label 2
+
+        '''
         exprCode, exprType = self.visit(ast.expr, Access(o.frame, o.sym, False, False))
         self.emit.printout(exprCode)
         
@@ -282,26 +281,39 @@ class CodeGenVisitor(BaseVisitor, Utils):
         o.frame.exitLoop()
         
     def visitFor(self, ast: For, o: SubBody):
-        result=''
+        labelStmt  = o.frame.getNewLabel()
+        labelCondition = o.frame.getNewLabel()
+        labelEnd    = o.frame.getNewLabel()
+        o.frame.enterLoop()
+        labelBreak = o.frame.getBreakLabel()
+        labelContinue = o.frame.getContinueLabel()
         expr1Code, expr1Type = self.visit(ast.expr1, Access(o.frame, o.sym, False, False))
+        self.emit.printout(expr1Code)
+        self.emit.printout(self.emit.emitLABEL(labelCondition, o.frame))
         expr2Code, expr2Type = self.visit(ast.expr2, Access(o.frame, o.sym, False, False))
-        result+=expr1Code+expr2Code
-        result+=self.emit.emitIFTRUE(labelStart, o.frame)
-        labelStart = o.frame.getNewLabel()
-        result+=self.emit.emitLABEL(labelStart, o.frame)
+        self.emit.printout(expr2Code)
+        self.emit.printout(self.emit.emitIFTRUE(labelStmt, o.frame))
+        self.emit.printout(self.emit.emitGOTO(labelEnd, o.frame))
+        self.emit.printout(self.emit.emitLABEL(labelStmt, o.frame))
+        self.visit(ast.loop, o)
+        self.emit.printout(self.emit.emitLABEL(labelContinue, o.frame))
+        self.visit(ast.expr3, o)
+        self.emit.printout(self.emit.emitGOTO(labelCondition, o.frame))
+        self.emit.printout(self.emit.emitLABEL(labelEnd, o.frame))
+        self.emit.printout(self.emit.emitLABEL(labelBreak, o.frame))
 
-        self.visit(ast.loop)
+        o.frame.exitLoop()
 
-
-
-        expr3Code, expr3Type = self.visit(ast.expr3, Access(o.frame, o.sym, False, False))
-
-
+    def visitBreak(self, ast: Break, o: SubBody):
+        self.emit.printout(self.emit.emitGOTO(o.frame.getBreakLabel(), o.frame))
+    
+    def visitContinue(self, ast: Continue, o:SubBody):
+        self.emit.printout(self.emit.emitGOTO(o.frame.getContinueLabel(),o.frame))
 
     def visitBlock(self, ast: Block, o: SubBody):
         [self.visit(x, o) for x in ast.member]
 
-    #==================================Expression=====================================
+#==================================Expression====================================
     # Param:    ast, Access(frame, sym, isLeft, isFirst)
     # Return:   (code, type)
 
