@@ -9,9 +9,15 @@ class CheckCodeGenSuite(unittest.TestCase):
         input = """
         int foo(int i){
             int j;
+            j=5;
+            putInt(j);
+            
             {
                 int j;
+                j=6;
+                putInt(j);
             }
+            putInt(j);
             return 1;
         }
 

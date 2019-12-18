@@ -176,7 +176,7 @@ class CodeGenVisitor(BaseVisitor, Utils):
 
         for x in body.member:
             if isinstance(x,VarDecl):
-                s= self.visit(x,s) 
+                s= self.visit(x,s)
             else:
                 self.visit(x,s)
           
@@ -337,7 +337,32 @@ class CodeGenVisitor(BaseVisitor, Utils):
         self.emit.printout(self.emit.emitGOTO(o.frame.getContinueLabel(),o.frame))
 
     def visitBlock(self, ast: Block, o: SubBody):
-        [self.visit(x, o) for x in ast.member]
+        # Blockframe = Frame(o.frame.name, None) #Frame('main', void)
+        # Blockframe.enterScope(True)
+        
+        # self.emit.printout(self.emit.emitLABEL(Blockframe.getStartLabel(),Blockframe))
+        # for x in body.member:
+        #     if isinstance(x,VarDecl):
+        #         s= self.visit(x,s)
+        #     else:
+        #         self.visit(x,s)
+        # [self.visit(x, SubBody(Blockframe,[])) for x in ast.member]
+        # self.emit.printout(self.emit.emitLABEL(Blockframe.getEndLabel(), Blockframe))
+        # Blockframe.exitScope()
+        frame=o.frame
+        frame.enterScope(False)
+        self.emit.printout(self.emit.emitLABEL(frame.getStartLabel(),frame))
+        #count the number of vardecl to pop it out of sym after exit scope
+        count=0
+        for x in ast.member:
+            if isinstance(x,VarDecl):
+                o= self.visit(x,o)
+                count+=1
+            else:
+                self.visit(x,o)
+        o.sym = o.sym[count:]
+        self.emit.printout(self.emit.emitLABEL(frame.getEndLabel(),frame))
+        frame.exitScope()
 
 #==================================Expression====================================
     # Param:    ast, Access(frame, sym, isLeft, isFirst)
@@ -371,7 +396,6 @@ class CodeGenVisitor(BaseVisitor, Utils):
     
 
     def visitId(self, ast: Id, acc: Access):
-
         resultCode=""
         sym = self.lookup(ast.name, acc.sym, lambda x: x.name)
 

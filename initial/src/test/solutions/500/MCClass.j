@@ -6,7 +6,19 @@
 .var 0 is i I from Label0 to Label1
 Label0:
 .var 1 is j I from Label0 to Label1
-.var 2 is j I from Label0 to Label1
+	iconst_5
+	istore_1
+	iload_1
+	invokestatic io/putInt(I)V
+Label2:
+.var 2 is j I from Label2 to Label3
+	bipush 6
+	istore_2
+	iload_2
+	invokestatic io/putInt(I)V
+Label3:
+	iload_1
+	invokestatic io/putInt(I)V
 	iconst_1
 	ireturn
 Label1:
