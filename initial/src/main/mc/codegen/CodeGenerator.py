@@ -381,6 +381,35 @@ class CodeGenVisitor(BaseVisitor, Utils):
         resultCode=""
         sym = self.lookup(ast.name, acc.sym, lambda x: x.name)
         isGlobal =isinstance(sym.value,CName)
+        if acc.isLeft: #left
+            if acc.isFirst:#first
+                 if isinstance(sym.mtype,(ArrayPointerType,ArrayType)):
+                    if isGlobal :
+                        resultCode+= self.emit.emitGETSTATIC(sym.value.value+"." + ast.name, sym.mtype,acc.frame)
+                    else:
+                        resultCode+= self.emit.emitREADVAR(ast.name, sym.mtype, sym.value.value, acc.frame)
+            else: #second
+                if isGlobal:
+                    #name = Class name + "." +field name 
+                    resultCode+= self.emit.emitPUTSTATIC(sym.value.value+"." + ast.name, sym.mtype, acc.frame)
+                else:
+                    resultCode+= self.emit.emitWRITEVAR(ast.name, sym.mtype, sym.value.value, acc.frame)
+                
+
+        else: #right
+            if acc.isFirst: #left
+                pass
+            else:#second
+                if  isGlobal:
+                    resultCode+= self.emit.emitGETSTATIC(sym.value.value+"." + ast.name, sym.mtype, acc.frame)
+                else:
+                    resultCode+= self.emit.emitREADVAR(ast.name, sym.mtype, sym.value.value, acc.frame)
+        return resultCode, sym.mtype
+        '''
+        if isinstance(acc,SubBody): return
+        resultCode=""
+        sym = self.lookup(ast.name, acc.sym, lambda x: x.name)
+        isGlobal =isinstance(sym.value,CName)
         if acc.isFirst:
             if acc.isLeft:
                 if isinstance(sym.mtype,(ArrayPointerType,ArrayType)):
@@ -401,24 +430,51 @@ class CodeGenVisitor(BaseVisitor, Utils):
                 else:
                     resultCode+= self.emit.emitREADVAR(ast.name, sym.mtype, sym.value.value, acc.frame)
         return resultCode, sym.mtype
+        '''
 
     def visitArrayCell(self, ast: ArrayCell, acc):
         '''
-        *in LSH: store (aload)
+        *in LSH and in second time access: store (aload)
         *in RHS: load value (<type>astore)
         '''
         if isinstance(acc,SubBody): return
-
-        arrcode, arrtype = self.visit(ast.arr, acc)
-        indexcode, indextype = self.visit(ast.idx, acc)
-        if acc.isLeft:
+        
+        if acc.isLeft: #LHS
+            '''
+            *if a[10] is LHS example: a[10]=3000;
+                1. aload , iconst (first time)
+                2. iconst 3000 (don't care)
+                3. iastore      (second time)
+            '''
+            arrcode1, arrtype1 = self.visit(ast.arr, Access(acc.frame, acc.sym,acc.isLeft, True ))
+            indexcode,indextype = self.visit(ast.idx, acc)
             if acc.isFirst:
-                result = arrcode + indexcode, arrtype.eleType
+                # aload , iconst
+                
+                result = arrcode1+ indexcode 
             else:
-                result = self.emit.emitASTORE(arrtype.eleType, acc.frame), arrtype.eleType
-        elif not acc.isLeft:
-            result = arrcode + indexcode + self.emit.emitALOAD(arrtype.eleType, acc.frame), arrtype.eleType
-        return result
+                 # iastore
+                result = self.emit.emitASTORE(arrtype1.eleType, acc.frame)
+
+
+        else :#RHS
+            '''
+            *if a[10] is RHS example: i = a[10];
+                1. aload <index of a> (second time)
+                2. iconst 10            (second time)
+                3. iaload               (second time)
+                4. istore <dont care>
+            '''
+            
+            if acc.isFirst:
+                result=""
+            else:
+                arrcode1, arrtype1 = self.visit(ast.arr, Access(acc.frame, acc.sym,False, False ))
+                indexcode, indextype = self.visit(ast.idx, acc)
+                result= arrcode1 + indexcode + self.emit.emitALOAD(arrtype1.eleType, acc.frame)
+
+        #print(" left ",acc.isLeft , ";     first ", acc.isFirst," :\n ",result)
+        return result, arrtype1.eleType
 
     def visitCallExpr(self, ast: CallExpr, o):
         '''
@@ -426,7 +482,6 @@ class CodeGenVisitor(BaseVisitor, Utils):
         *subBody when Call is a statement => print code JVM
         *Access when Call is a expression => return code JVM for caller
         '''
-
         ctxt = o
         frame = ctxt.frame
         nenv = ctxt.sym
@@ -438,7 +493,9 @@ class CodeGenVisitor(BaseVisitor, Utils):
         in_ = ("", list())
         for i, arg in enumerate(ast.param):
             #arg:expr
+            #in RHS just visit in 2nd time
             paramcode, paramtype = self.visit(arg, Access(frame, nenv, False, False))
+
             #convert float to int
             if type(paramtype) != type(sym.mtype.partype[i]): 
                 paramcode+= self.emit.emitI2F(frame)
@@ -457,7 +514,6 @@ class CodeGenVisitor(BaseVisitor, Utils):
         1. Assign: can be statement or expression
         2. Others: just be expression
         '''
-
         # Not assign Op
         if ast.op != '=':
             lcode, ltype = self.visit(ast.left, acc)
@@ -497,7 +553,7 @@ class CodeGenVisitor(BaseVisitor, Utils):
             rcode, rtype = self.visit(ast.right, Access(acc.frame,acc.sym,False,False))
         
             lcode2, ltype2 = self.visit(ast.left, Access(acc.frame,acc.sym,True,False))
-
+            
             result= lcode+rcode+lcode2
             #just print if this is assign Op:
             self.emit.printout(result)
@@ -511,9 +567,9 @@ class CodeGenVisitor(BaseVisitor, Utils):
 
         bodycode, bodytype = self.visit(ast.body,acc)
         if ast.op == '-':
-            return bodycode + self.emit.emitNEGOP(bodytype, acc.frame)
+            return bodycode + self.emit.emitNEGOP(bodytype, acc.frame), bodytype
         if ast.op =='!':
-            return bodycode + self.emit.emitNOT(bodytype, acc.frame)
+            return bodycode + self.emit.emitNOT(bodytype, acc.frame), bodytype
         
     def visitIntLiteral(self, ast, acc):
         if isinstance(acc,SubBody): return
