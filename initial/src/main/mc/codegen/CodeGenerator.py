@@ -122,8 +122,10 @@ class CodeGenVisitor(BaseVisitor, Utils):
             subBody = self.visit(x, subBody)
         
         # generate default constructor
-        initFunc = FuncDecl(Id("<init>"), list(), None, Block(list()))
-        self.genMETHOD(initFunc, gloenvi, Frame("<init>", VoidType))
+        initConstructor = FuncDecl(Id("<init>"), list(), None, Block(list()))
+        initClass = FuncDecl(Id("<clinit>"), list(), None, Block(list()))
+        self.genMETHOD(initConstructor, subBody.sym, Frame("<init>", VoidType))
+        self.genMETHOD(initClass, subBody.sym, Frame("<clinit>", VoidType))
         self.emit.emitEPILOG()
         return gloenvi
 
@@ -134,15 +136,18 @@ class CodeGenVisitor(BaseVisitor, Utils):
         return SubBody(None, [Symbol(ast.name.name, MType([x.varType for x in ast.param] if ast.name.name not in ['main','<init>'] else list(), ast.returnType), CName(self.className))] + subBody.sym)
     
     def genMETHOD(self, ast,envi, frame):
+     
         #ast: FuncDecl
         #envi: list Symbols
         #frame: Frame
 
-        isInit = ast.returnType is None
+        isInit = ast.name.name == "<init>"
+        isClinit = ast.name.name == "<clinit>"
         isMain = ast.name.name == "main" 
        
-        returnType = VoidType() if isInit else ast.returnType
-        methodName = "<init>" if isInit else ast.name.name
+        returnType = VoidType() if isInit or isClinit else ast.returnType
+        #methodName = "<init>" if isInit else ast.name.name
+        methodName = ast.name.name
         #main: String[] args
         #other: foo(int a,b) => [int, int]
         intype = [ArrayPointerType(StringType())] if isMain else [x.varType for x in ast.param]
@@ -155,11 +160,13 @@ class CodeGenVisitor(BaseVisitor, Utils):
         frame.enterScope(True)
 
         localEnvi = envi
-
         # Generate code for parameter declarations
         if isInit:
             #.var 0 is this LMCClass; from Label0 to Label1
             self.emit.printout(self.emit.emitVAR(frame.getNewIndex(), "this", ClassType(self.className), frame.getStartLabel(), frame.getEndLabel(), frame))
+        elif isClinit:
+            #in isClinit, there is not declaration, just initialize
+            pass
         if isMain:
             #.var 0 is args [Ljava/lang/String; from Label0 to Label1
             self.emit.printout(self.emit.emitVAR(frame.getNewIndex(), "args", ArrayPointerType(StringType()), frame.getStartLabel(), frame.getEndLabel(), frame))
@@ -179,6 +186,19 @@ class CodeGenVisitor(BaseVisitor, Utils):
         if isInit:
             self.emit.printout(self.emit.emitREADVAR("this", ClassType(self.className), 0, frame))
             self.emit.printout(self.emit.emitINVOKESPECIAL(frame))
+        
+        if isClinit:
+            '''
+            bipush 10
+            newarray int
+            putstatic MCClass.a [I
+	
+            '''
+            
+            globalArrVar = filter(lambda x:(isinstance(x.value, CName) and isinstance(x.mtype, ArrayType)),envi )
+            for ast_i in globalArrVar:
+                #vardecl(variable= "arr", varType = ArrayType(dimen = 10, eleType = IntType()))
+                self.emit.printout(self.emit.emitClinitForArrayGlobal(ast_i.value.value+"."+ ast_i.name, ast_i.mtype,frame ))
 
         for x in body.member:
             if isinstance(x,VarDecl):
@@ -362,7 +382,6 @@ class CodeGenVisitor(BaseVisitor, Utils):
         self.emit.printout(self.emit.emitLABEL(frame.getEndLabel(),frame))
         frame.exitScope()
 
-
 #==================================Expression====================================
     '''
     *Param:     ast, Access(frame, sym, isLeft, isFirst)
@@ -405,33 +424,7 @@ class CodeGenVisitor(BaseVisitor, Utils):
                 else:
                     resultCode+= self.emit.emitREADVAR(ast.name, sym.mtype, sym.value.value, acc.frame)
         return resultCode, sym.mtype
-        '''
-        if isinstance(acc,SubBody): return
-        resultCode=""
-        sym = self.lookup(ast.name, acc.sym, lambda x: x.name)
-        isGlobal =isinstance(sym.value,CName)
-        if acc.isFirst:
-            if acc.isLeft:
-                if isinstance(sym.mtype,(ArrayPointerType,ArrayType)):
-                    if isGlobal :
-                        resultCode+= self.emit.emitGETSTATIC(sym.value.value+"." + ast.name, sym.mtype,acc.frame)
-                    else:
-                        resultCode+= self.emit.emitREADVAR(ast.name, sym.mtype, sym.value.value, acc.frame)
-        else:
-            if acc.isLeft:
-                if isGlobal:
-                    #name = Class name + "." +field name 
-                    resultCode+= self.emit.emitPUTSTATIC(sym.value.value+"." + ast.name, sym.mtype, acc.frame)
-                else:
-                    resultCode+= self.emit.emitWRITEVAR(ast.name, sym.mtype, sym.value.value, acc.frame)
-            else:
-                if  isGlobal:
-                    resultCode+= self.emit.emitGETSTATIC(sym.value.value+"." + ast.name, sym.mtype, acc.frame)
-                else:
-                    resultCode+= self.emit.emitREADVAR(ast.name, sym.mtype, sym.value.value, acc.frame)
-        return resultCode, sym.mtype
-        '''
-
+    
     def visitArrayCell(self, ast: ArrayCell, acc):
         '''
         *in LSH and in second time access: store (aload)

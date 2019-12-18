@@ -8,12 +8,10 @@ class CheckCodeGenSuite(unittest.TestCase):
         """Simple program: int main() {} """
         input = """
 
-        //int a[10];
+        int a[10];
         void main() {
-            int a[10]
             a[0]=1;
-            a[1] =1+a[0];
-            putIntLn(a[1]);
+            putIntLn(a[0]);
         }
         //int b;
         """

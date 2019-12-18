@@ -153,6 +153,19 @@ class Emitter():
             frame.push()
             code += self.emitWRITEVAR(varName, inType, frame.currIndex-1, frame)
         return code
+    def emitClinitForArrayGlobal(self,varName, inType, frame):
+        #varName: String
+        #inType: element Type of array
+        #dimen: Int
+        frame.push()
+        code = self.emitPUSHICONST(int(str(inType.dimen)),frame)
+        frame.pop()
+        code += self.jvm.emitNEWARRAY(self.getFullType(inType.eleType))
+        frame.push()
+        code += self.jvm.emitPUTSTATIC(varName,self.getJVMType(inType))
+        return code
+
+
     def emitREADVAR(self, name, inType, index, frame):
         #name: String
         #inType: Type
