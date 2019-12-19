@@ -1,3 +1,6 @@
+'''
+*1713454
+'''
 from Utils import *
 from StaticCheck import *
 from StaticError import *
@@ -47,8 +50,9 @@ class Emitter():
         #in: Int or Sring
         #frame: Frame
         
-        frame.push();
+        
         if type(in_) is int:
+            frame.push();
             i = in_
             if i >= -1 and i <=5:
                 return self.jvm.emitICONST(i)
@@ -57,6 +61,7 @@ class Emitter():
             elif i >= -32768 and i <= 32767:
                 return self.jvm.emitSIPUSH(i)
         elif type(in_) is str:
+
             if in_ == "True":
                 return self.emitPUSHICONST(1, frame)
             elif in_ == "False":

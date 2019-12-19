@@ -330,7 +330,7 @@ class JasminCode(MachineCode):
     def emitICONST(self, i):
         #i: Int
         if i == -1:
-            return JasminCode.INDENT + "iconst_ml" + JasminCode.END
+            return JasminCode.INDENT + "iconst_m1" + JasminCode.END
         elif i >= 0 or i <= 5:
             return JasminCode.INDENT + "iconst_" + str(i) + JasminCode.END
         else:
@@ -483,7 +483,7 @@ class JasminCode(MachineCode):
         return JasminCode.INDENT + "ior" + JasminCode.END
     
     def emitIREM(self):
-        return JasminCode.INDENT + "rem" + JasminCode.END
+        return JasminCode.INDENT + "irem" + JasminCode.END
     
     def emitIFACMPEQ(self, label):
         #label: Int
@@ -547,7 +547,6 @@ class JasminCode(MachineCode):
     
     def emitGOTO(self, label):
         #label: Int
-        #return JasminCode.INDENT + "goto Label" + label + JasminCode.END #draft
         return JasminCode.INDENT + "goto Label" + str(label) + JasminCode.END
 
     
