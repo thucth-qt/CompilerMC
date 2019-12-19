@@ -7,6 +7,19 @@ from StaticError import *
 from MachineCode import JasminCode
 import CodeGenerator as cgen
 
+class IllegalOperandException(Exception):
+	def __init__(self,msg):
+	# msg:string
+		self.s = msg
+	def __str__(self):
+		return "Illegal Operand: " + self.s +"\n"
+class IllegalRuntimeException(Exception):
+	def __init__(self,msg):
+	# msg:string
+		self.s = msg
+	def __str__(self):
+		return "Illegal Runtime: " + self.s +"\n"
+        
 class Emitter():
     def __init__(self, filename):
         self.filename = filename
@@ -46,40 +59,38 @@ class Emitter():
         elif typeIn is VoidType:
             return "void"
 
-    def emitPUSHICONST(self, in_, frame):
-        #in: Int or Sring
+    def emitPUSHICONST(self, value, frame):
+        #value: Int or Sring
         #frame: Frame
-        
-        
-        if type(in_) is int:
+        if type(value) is int:
             frame.push();
-            i = in_
+            i = value
             if i >= -1 and i <=5:
                 return self.jvm.emitICONST(i)
             elif i >= -128 and i <= 127:
                 return self.jvm.emitBIPUSH(i)
             elif i >= -32768 and i <= 32767:
                 return self.jvm.emitSIPUSH(i)
-        elif type(in_) is str:
+        elif type(value) is str:
 
-            if in_ == "True":
+            if value == "True":
                 return self.emitPUSHICONST(1, frame)
-            elif in_ == "False":
+            elif value == "False":
                 return self.emitPUSHICONST(0, frame)
             else:
-                return self.emitPUSHICONST(int(in_), frame)
+                return self.emitPUSHICONST(int(value), frame)
 
-    def emitPUSHFCONST(self, in_, frame):
-        #in_: String
+    def emitPUSHFCONST(self, value, frame):
+        #value: String
         #frame: Frame
         
-        f = float(in_)
+        f = float(value)
         frame.push()
         rst = "{0:.4f}".format(f)
         if rst == "0.0" or rst == "1.0" or rst == "2.0":
             return self.jvm.emitFCONST(rst)
         else:
-            return self.jvm.emitLDC(in_)  
+            return self.jvm.emitLDC(value)  
        
 
     ''' 
@@ -87,18 +98,18 @@ class Emitter():
     *    @param in the lexeme of the constant
     *    @param typ the type of the constant
     '''
-    def emitPUSHCONST(self, in_, typ, frame):
-        #in_: String
-        #typ: Type
+    def emitPUSHCONST(self, value, typ, frame):
+        #value: String
+        #typ: Type in MC
         #frame: Frame
-        
         if type(typ) is IntType:
-            return self.emitPUSHICONST(in_, frame)
+            return self.emitPUSHICONST(value, frame)
         elif type(typ) is StringType:
             frame.push()
-            return self.jvm.emitLDC('"'+in_+'"')
+            return self.jvm.emitLDC('"'+value+'"')
         else:
-            raise IllegalOperandException(in_)
+            raise IllegalOperandException(value)
+        
 
     ##############################################################
 
@@ -129,7 +140,11 @@ class Emitter():
         frame.pop()
         if type(in_) is IntType:
             return self.jvm.emitIASTORE()
-        elif type(in_) is ArrayPointerType or type(in_) is ClassType or type(in_) is StringType:
+        elif type(in_) is BoolType:
+            return self.jvm.emitBASTORE()
+        elif type(in_) is FloatType:
+            return self.jvm.emitFASTORE()
+        elif type(in_) is ArrayPointerType or type(in_) is StringType:
             return self.jvm.emitAASTORE()
         else:
             raise IllegalOperandException(str(in_))
@@ -350,12 +365,12 @@ class Emitter():
         label1 = frame.getNewLabel()
         label2 = frame.getNewLabel()
         result = list()
-        result.append(emitIFTRUE(label1, frame))
-        result.append(emitPUSHCONST("true", in_, frame))
-        result.append(emitGOTO(label2, frame))
-        result.append(emitLABEL(label1, frame))
-        result.append(emitPUSHCONST("false", in_, frame))
-        result.append(emitLABEL(label2, frame))
+        result.append(self.emitIFTRUE(label1, frame))
+        result.append(self.emitPUSHICONST("True", frame))
+        result.append(self.emitGOTO(label2, frame))
+        result.append(self.emitLABEL(label1, frame))
+        result.append(self.emitPUSHICONST("False", frame))
+        result.append(self.emitLABEL(label2, frame))
         return ''.join(result)
 
     '''

@@ -113,12 +113,7 @@ class CodeGenVisitor(BaseVisitor, Utils):
         #in global: frame = None
         subBody = SubBody(None,gloenvi )
 
-        # generate default constructor
-        initConstructor = FuncDecl(Id("<init>"), list(), None, Block(list()))
-        initClass = FuncDecl(Id("<clinit>"), list(), None, Block(list()))
-        self.genMETHOD(initConstructor, subBody.sym, Frame("<init>", VoidType))
-        self.genMETHOD(initClass, subBody.sym, Frame("<clinit>", VoidType))
-
+       
         #visit Declarations:
         '''
         1. visit all var declarations in global
@@ -132,7 +127,12 @@ class CodeGenVisitor(BaseVisitor, Utils):
         for x in filter(lambda x: isinstance(x,FuncDecl), ast.decl):
             subBody = self.visit(x, subBody)
 
-       
+        # generate default constructor
+        initConstructor = FuncDecl(Id("<init>"), list(), None, Block(list()))
+        initClass = FuncDecl(Id("<clinit>"), list(), None, Block(list()))
+        self.genMETHOD(initConstructor, subBody.sym, Frame("<init>", VoidType))
+        self.genMETHOD(initClass, subBody.sym, Frame("<clinit>", VoidType))
+
         self.emit.emitEPILOG()
         return gloenvi
 
@@ -154,15 +154,12 @@ class CodeGenVisitor(BaseVisitor, Utils):
         isMain = ast.name.name == "main" 
        
         returnType = VoidType() if isInit or isClinit else ast.returnType
-        #methodName = "<init>" if isInit else ast.name.name
         methodName = ast.name.name
         #main: String[] args
-        #other: foo(int a,b) => [int, int]
         intype = [ArrayPointerType(StringType())] if isMain else [x.varType for x in ast.param]
     
         mtype = MType(intype, VoidType()) if isMain else MType(intype,returnType) 
 
-        #.method public static? main(...)V
         self.emit.printout(self.emit.emitMETHOD(methodName, mtype, not isInit, frame))
 
         frame.enterScope(True)
@@ -179,8 +176,6 @@ class CodeGenVisitor(BaseVisitor, Utils):
             #.var 0 is args [Ljava/lang/String; from Label0 to Label1
             self.emit.printout(self.emit.emitVAR(frame.getNewIndex(), "args", ArrayPointerType(StringType()), frame.getStartLabel(), frame.getEndLabel(), frame))
         
-        #if localEnvi is None: localEnvi=[]
-            # visit parameters and add vardecls to s
         s= SubBody(frame,localEnvi)
         
         for x in ast.param:
@@ -202,10 +197,8 @@ class CodeGenVisitor(BaseVisitor, Utils):
             putstatic MCClass.a [I
 	
             '''
-            
             globalArrVar = filter(lambda x:(isinstance(x.value, CName) and isinstance(x.mtype, ArrayType)),envi )
             for ast_i in globalArrVar:
-                #vardecl(variable= "arr", varType = ArrayType(dimen = 10, eleType = IntType()))
                 self.emit.printout(self.emit.emitClinitForArrayGlobal(ast_i.value.value+"."+ ast_i.name, ast_i.mtype,frame ))
         for x in body.member:
             if isinstance(x,VarDecl):
@@ -221,7 +214,7 @@ class CodeGenVisitor(BaseVisitor, Utils):
   
         if (type(returnType) is VoidType) or (frame.name == "main"):
             self.emit.printout(self.emit.emitRETURN(VoidType(), frame))
-    
+
         self.emit.printout(self.emit.emitENDMETHOD(frame))
         frame.exitScope();
 
@@ -259,7 +252,7 @@ class CodeGenVisitor(BaseVisitor, Utils):
                 expCode = expCode + self.emit.emitI2F(frame)
             self.emit.printout(expCode)
             self.emit.printout(self.emit.emitRETURN(retType, frame))
-    
+        return True #isReturn , for check isReturn later
     def visitIf(self, ast: If, o: SubBody):
         '''
             1. visit expr
@@ -269,6 +262,7 @@ class CodeGenVisitor(BaseVisitor, Utils):
             5.Label 1
             6. do thenStmt
             7.Label 2
+            8.label end
 
         '''
         exprCode, exprType = self.visit(ast.expr, Access(o.frame, o.sym, False, False))
@@ -280,21 +274,21 @@ class CodeGenVisitor(BaseVisitor, Utils):
         self.emit.printout(self.emit.emitIFTRUE(labelTrue, o.frame))
 
         # self.emit.printout(self.emit.emitGOTO(labelFalse, o.frame))
-        isReturn=False
+        isReturnElse=False
         if ast.elseStmt is not None:
-            if isinstance(ast.elseStmt,Return):
-                isReturn=True
-            self.visit(ast.elseStmt,o)
+            if self.visit(ast.elseStmt,o) is True: isReturnElse = True
 
-        if not isReturn:
+        if not isReturnElse:
             self.emit.printout(self.emit.emitGOTO(labelEnd, o.frame))
 
         self.emit.printout(self.emit.emitLABEL(labelTrue, o.frame))
         
-        self.visit(ast.thenStmt,o)
+        isReturnThen=False
+        if self.visit(ast.thenStmt,o) is True:
+            isReturnThen=True
         
         self.emit.printout(self.emit.emitLABEL(labelEnd, o.frame))
-
+        return isReturnThen and isReturnElse
     def visitDowhile(self, ast:Dowhile, o: SubBody):
         '''
         1. Label Start
@@ -345,7 +339,7 @@ class CodeGenVisitor(BaseVisitor, Utils):
         o.frame.enterLoop()
         labelBreak = o.frame.getBreakLabel()
         labelContinue = o.frame.getContinueLabel()
-
+        isReturn=False
         self.visit(ast.expr1,o)
         self.emit.printout(self.emit.emitLABEL(labelCondition, o.frame))
         expr2Code, expr2Type = self.visit(ast.expr2, Access(o.frame, o.sym, False, False))
@@ -353,13 +347,16 @@ class CodeGenVisitor(BaseVisitor, Utils):
         self.emit.printout(self.emit.emitIFTRUE(labelTrue, o.frame))
         self.emit.printout(self.emit.emitGOTO(labelBreak, o.frame))
         self.emit.printout(self.emit.emitLABEL(labelTrue, o.frame))
-        self.visit(ast.loop, o)
+        if self.visit(ast.loop, o) is True:
+            isReturn = True
         self.emit.printout(self.emit.emitLABEL(labelContinue, o.frame))
-        self.visit(ast.expr3, o)
-        self.emit.printout(self.emit.emitGOTO(labelCondition, o.frame))
+        if not isReturn:
+            self.visit(ast.expr3, o)
+            self.emit.printout(self.emit.emitGOTO(labelCondition, o.frame))
         self.emit.printout(self.emit.emitLABEL(labelBreak, o.frame))
 
         o.frame.exitLoop()
+        return isReturn
 
     def visitBreak(self, ast: Break, o: SubBody):
         '''
@@ -384,15 +381,18 @@ class CodeGenVisitor(BaseVisitor, Utils):
         self.emit.printout(self.emit.emitLABEL(frame.getStartLabel(),frame))
         #count the number of vardecl to pop it out of sym after exit scope
         count=0
+        isReturn=False
         for x in ast.member:
             if isinstance(x,VarDecl):
                 o= self.visit(x,o)
                 count+=1
             else:
-                self.visit(x,o)
+                if self.visit(x,o) is True:
+                    isReturn=True
         o.sym = o.sym[count:]
         self.emit.printout(self.emit.emitLABEL(frame.getEndLabel(),frame))
         frame.exitScope()
+        return isReturn
 
 #==================================Expression====================================
     '''
@@ -507,7 +507,9 @@ class CodeGenVisitor(BaseVisitor, Utils):
             #convert float to int
             if isinstance(paramtype,IntType) and isinstance(sym.mtype.partype[i],FloatType): 
                 paramcode+= self.emit.emitI2F(frame)
-            in_ = (in_[0] + paramcode, in_[1].append(paramtype))
+ 
+            in_ = (in_[0] + paramcode, in_[1]+[paramtype])
+
         
         temp= self.emit.emitINVOKESTATIC(cname + "/" + ast.method.name, ctype, frame)
         if isinstance(o,SubBody):
@@ -591,9 +593,8 @@ class CodeGenVisitor(BaseVisitor, Utils):
         
     def visitIntLiteral(self, ast, acc):
         if isinstance(acc,SubBody): return
+        return self.emit.emitPUSHICONST(ast.value, acc.frame), IntType()
 
-        temp= self.emit.emitPUSHICONST(ast.value, acc.frame), IntType()
-        return temp
        
     def visitFloatLiteral(self, ast, acc):
         if isinstance(acc,SubBody): return
@@ -601,8 +602,8 @@ class CodeGenVisitor(BaseVisitor, Utils):
 
     def visitBooleanLiteral(self, ast, acc):
         if isinstance(acc,SubBody): return
-        temp=self.emit.emitPUSHICONST(str(ast.value), acc.frame), BoolType()
-        return temp
+        return self.emit.emitPUSHICONST(str(ast.value), acc.frame), BoolType()
+   
     
     def visitStringLiteral(self, ast, acc):
         if isinstance(acc,SubBody): return
